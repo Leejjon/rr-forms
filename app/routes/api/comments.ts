@@ -1,5 +1,6 @@
 import {type Route} from "../../../.react-router/types/app/routes/api/+types/comments";
-import {type Comment, addComment} from "~/database/comments.server";
+import {addComment} from "~/database/comments.server";
+import {type Comment} from "~/common/comments";
 import {randomUUID} from "node:crypto";
 import {redirect} from "react-router";
 

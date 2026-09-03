@@ -1,11 +1,4 @@
-import {type UUID} from "node:crypto";
-
-export type Comment = {
-    id: UUID;
-    timestamp: Date;
-    name: string;
-    message: string;
-}
+import {type Comment} from "~/common/comments";
 
 const comments: Comment[] = [];
 
