@@ -1,5 +1,17 @@
 import type {Route} from "./+types/home";
-import {getComments} from "~/database/comments.server";
+import {addComment, getComments} from "~/database/comments.server";
+import {randomUUID} from "node:crypto";
+import type {Comment} from "~/common/comments";
+import {redirect} from "react-router";
+
+export async function action({request}: Route.ActionArgs) {
+    const formData = await request.formData();
+    const name = formData.get("name");
+    const message = formData.get("message");
+    addComment({id: randomUUID(), timestamp: new Date(), name, message} as Comment);
+    return redirect("/");
+}
+
 
 export async function loader(args: Route.LoaderArgs) {
     const commentsElement = `<div>${getComments().map((comment) => {
@@ -7,7 +19,7 @@ export async function loader(args: Route.LoaderArgs) {
             `<br /><i>Posted at ${comment.timestamp}</i></div>`
     }).join('<br/>')}</div>`;
 
-    const commentForm = "<form action='/api/comments' method='POST'>" +
+    const commentForm = "<form action='/' method='POST'>" +
         `${commentsElement}` +
         "<br />" +
         "<label>Name:</label><br />" +
