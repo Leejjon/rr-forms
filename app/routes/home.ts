@@ -1,8 +1,15 @@
 import type {Route} from "./+types/home";
 
-export async function loader(args: Route.LoaderArgs) {
+export async function action({request}: Route.ActionArgs) {
+    const formData = await request.formData();
+    const name = formData.get("name");
+    const message = formData.get("message");
+    console.log(`Name=${name} Message=${message}`);
+    return "Form submitted";
+}
 
-    const commentForm = "<form action='/api/comments' method='POST'>" +
+export async function loader(args: Route.LoaderArgs) {
+    const commentForm = "<form action='/' method='POST'>" +
         "<label>Name:</label><br />" +
         "<input name='name' /><br />" +
         "<label>Message:</label><br />" +
