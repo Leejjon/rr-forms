@@ -8,6 +8,17 @@ export async function action({request}: Route.ActionArgs) {
     const formData = await request.formData();
     const name = formData.get("name");
     const message = formData.get("message");
-    addComment({id: randomUUID(), timestamp: new Date(), name, message} as Comment);
-    return redirect("/");
+
+    function nameIsValid(): boolean {
+        return !!name?.toString().match(/^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$/);
+    }
+
+    if (nameIsValid()) {
+        addComment({id: randomUUID(), timestamp: new Date(), name, message} as Comment);
+        return redirect("/");
+    } else {
+        return new Response("Invalid name", {
+            status: 400
+        });
+    }
 }
