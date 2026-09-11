@@ -10,7 +10,11 @@ export async function action({request}: Route.ActionArgs) {
     const message = formData.get("message");
 
     function nameIsValid(): boolean {
-        return !!name?.toString().match(/^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$/);
+        if (name) {
+            return name.toString().length > 0 && name.toString().length < 20 &&
+                name.toString().match(/^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$/) !== null;
+        }
+        return false;
     }
 
     if (nameIsValid()) {
