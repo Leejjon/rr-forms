@@ -1,7 +1,7 @@
 import type {Route} from "./+types/home";
 
 export async function loader(args: Route.LoaderArgs) {
-    const commentForm = "<form action='/api/comments' method='POST'>" +
+    const commentForm = "<form action='/' method='POST'>" +
         "<label>Name:</label><br />" +
         "<input name='name' /><br />" +
         "<label>Message:</label><br />" +
