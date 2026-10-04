@@ -1,8 +1,13 @@
 import {type UUID} from "node:crypto";
 
-export type Comment = {
+export type NewCommentRequest = {
+    name: string;
+    message: string;
+}
+
+export type CommentResponse = {
     id: UUID;
-    timestamp: Date;
+    timestamp: string;
     name: string;
     message: string;
 }

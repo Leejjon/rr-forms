@@ -1,24 +1,83 @@
 import type {Route} from "./+types/home";
+import type {CommentResponse, NewCommentRequest} from "~/common/comments";
+import {type ChangeEvent, useRef, useState} from "react";
+import {nameIsValid} from "~/common/validation";
+import {addComment, getComments} from "~/database/comments.server";
+import {useLoaderData} from "react-router";
 
-export function meta({}: Route.MetaArgs) {
-    return [
-        {title: "New React Router App"},
-        {name: "description", content: "Welcome to React Router!"},
-    ];
+export async function action({request}: Route.ActionArgs) {
+    const newComment = await request.json() as NewCommentRequest;
+    addComment(newComment);
+    return new Response("Success", {status: 200});
+}
+
+export async function loader({request}: Route.LoaderArgs) {
+    return getComments().map((comment) => {
+        return {
+            id: comment.id,
+            name: comment.name, message: comment.message, timestamp: comment.timestamp.toISOString()
+        } as CommentResponse
+    });
 }
 
 export default function Home() {
-    function submitComment() {
+    const comments = useLoaderData<typeof loader>();
 
+    const [nameInvalid, setNameInvalid] = useState(false);
+    const nameInputRef = useRef<HTMLInputElement | null>(null);
+    const messageInputRef = useRef<HTMLTextAreaElement | null>(null);
+
+    function validateUpdatedName(event: ChangeEvent<HTMLInputElement>) {
+        if (nameIsValid(event.target.value)) {
+            setNameInvalid(false);
+        } else {
+            setNameInvalid(true);
+        }
+    }
+
+    function submitComment() {
+        if (!nameIsValid(nameInputRef.current?.value)) {
+            nameInputRef.current?.focus();
+            return;
+        }
+
+        const commentRequestBody = {
+            name: nameInputRef.current?.value, message: messageInputRef.current?.value
+        };
+
+        fetch('/?index', {
+            method: "POST",
+            body: JSON.stringify(commentRequestBody)
+        }).then(response => {
+            if (response.status === 200) {
+                window.location.reload();
+            }
+        });
     }
 
     return (
         <div className="flex flex-col items-start *:m-1">
-          <label>Name:</label>
-          <input name='name' className="border border-gray-400 rounded px-2 py-1" />
-          <label>Message:</label>
-          <textarea name='message' className="border border-gray-400 rounded px-2 py-1" />
-          <button className="border border-gray-400 rounded bg-gray-100 px-3 py-1 hover:bg-gray-200 active:bg-gray-300" onClick={submitComment}>Submit</button>
+            {comments.map((comment) => {
+                return (
+                    <div key={comment.id} className="flex flex-col" >
+                        <div><b>{comment.name}: </b><>{comment.message} </></div>
+                        <i>Posted at {comment.timestamp as unknown as String}</i>
+                    </div>
+                );
+            })
+            }
+            <label>Name:</label>
+            <div className="flex items-center gap-2">
+                <input name='name' ref={nameInputRef} onChange={validateUpdatedName}
+                       className="border border-gray-400 rounded px-2 py-1"/>
+                {nameInvalid && <label className="error">You entered an invalid name.</label>}
+            </div>
+            <label>Message:</label>
+            <textarea name='message' ref={messageInputRef} className="border border-gray-400 rounded px-2 py-1"/>
+            <button
+                className="border border-gray-400 rounded bg-gray-100 px-3 py-1 hover:bg-gray-200 active:bg-gray-300"
+                onClick={submitComment}>Submit
+            </button>
         </div>
     );
 }
