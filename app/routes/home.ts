@@ -1,13 +1,12 @@
 import type {Route} from "./+types/home";
 import {addComment, getComments} from "~/database/comments.server";
-import {randomUUID} from "node:crypto";
-import type {Comment} from "~/common/comments";
+import type {NewComment} from "~/common/comments";
 import {redirect} from "react-router";
 
 function createCommentsElements() {
     return `<div>${getComments().map((comment) => {
         return `<div key="${comment.id}"><b>${comment.name}:</b> ${comment.message}` +
-            `<br /><i>Posted at ${comment.timestamp}</i></div>`
+            `<br /><i>Posted at ${new Date(comment.timestamp).toISOString()}</i></div>`
     }).join('<br/>')}</div>`;
 }
 
@@ -39,7 +38,7 @@ export async function action({request}: Route.ActionArgs) {
     }
 
     if (nameIsValid()) {
-        addComment({id: randomUUID(), timestamp: new Date(), name, message} as Comment);
+        addComment({name, message} as NewComment);
         return redirect("/");
     } else {
         return new Response(`Invalid request`, {
