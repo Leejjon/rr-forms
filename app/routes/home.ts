@@ -1,24 +1,16 @@
 import type {Route} from "./+types/home";
 import {addComment, getComments} from "~/database/comments.server";
-import {randomUUID} from "node:crypto";
-import type {Comment} from "~/common/comments";
+import type {NewComment} from "~/common/comments";
 import {redirect} from "react-router";
+import {nameIsValid} from "~/common/validation";
 
 export async function action({request}: Route.ActionArgs) {
     const formData = await request.formData();
     const name = formData.get("name");
     const message = formData.get("message");
 
-    function nameIsValid(): boolean {
-        if (name) {
-            return name.toString().length > 0 && name.toString().length < 20 &&
-                name.toString().match(/^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$/) !== null;
-        }
-        return false;
-    }
-
-    if (nameIsValid()) {
-        addComment({id: randomUUID(), timestamp: new Date(), name, message} as Comment);
+    if (nameIsValid(name?.toString())) {
+        addComment({name, message} as NewComment);
         return redirect("/");
     } else {
         return new Response("Invalid name", {
@@ -30,7 +22,7 @@ export async function action({request}: Route.ActionArgs) {
 export async function loader(args: Route.LoaderArgs) {
     const commentsElement = `<div>${getComments().map((comment) => {
         return `<div key="${comment.id}"><b>${comment.name}:</b> ${comment.message}` +
-            `<br /><i>Posted at ${comment.timestamp}</i></div>`
+            `<br /><i>Posted at ${new Date(comment.timestamp).toISOString()}</i></div>`
     }).join('<br/>')}</div>`;
 
     const commentForm = "<form action='/' method='POST'>" +
