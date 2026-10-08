@@ -5,9 +5,9 @@ export type NewCommentRequest = {
     message: string;
 }
 
-export type CommentResponse = {
+export type Comment = {
     id: UUID;
-    timestamp: string;
+    timestamp: number;
     name: string;
     message: string;
 }

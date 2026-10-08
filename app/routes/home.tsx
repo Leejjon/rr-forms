@@ -1,5 +1,5 @@
 import type {Route} from "./+types/home";
-import type {CommentResponse, NewCommentRequest} from "~/common/comments";
+import type {Comment, NewCommentRequest} from "~/common/comments";
 import {type ChangeEvent, useRef, useState} from "react";
 import {nameIsValid} from "~/common/validation";
 import {addComment, getComments} from "~/database/comments.server";
@@ -7,17 +7,17 @@ import {useLoaderData} from "react-router";
 
 export async function action({request}: Route.ActionArgs) {
     const newComment = await request.json() as NewCommentRequest;
-    addComment(newComment);
-    return new Response("Success", {status: 200});
+
+    if (nameIsValid(newComment.name)) {
+        addComment(newComment);
+        return new Response("Success", {status: 200});
+    } else {
+        return new Response("Bad request", {status: 400});
+    }
 }
 
-export async function loader({request}: Route.LoaderArgs) {
-    return getComments().map((comment) => {
-        return {
-            id: comment.id,
-            name: comment.name, message: comment.message, timestamp: comment.timestamp.toISOString()
-        } as CommentResponse
-    });
+export async function loader() {
+    return getComments();
 }
 
 export default function Home() {
@@ -51,6 +51,8 @@ export default function Home() {
         }).then(response => {
             if (response.status === 200) {
                 window.location.reload();
+            } else {
+                setNameInvalid(true);
             }
         });
     }
@@ -59,9 +61,10 @@ export default function Home() {
         <div className="flex flex-col items-start *:m-1">
             {comments.map((comment) => {
                 return (
-                    <div key={comment.id} className="flex flex-col" >
-                        <div><b>{comment.name}: </b><>{comment.message} </></div>
-                        <i>Posted at {comment.timestamp as unknown as String}</i>
+                    <div key={comment.id} className="flex flex-col">
+                        <div><b>{comment.name}: </b><>{comment.message} </>
+                        </div>
+                        <i>Posted at {new Date(comment.timestamp).toLocaleString()}</i>
                     </div>
                 );
             })
