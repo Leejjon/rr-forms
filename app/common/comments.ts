@@ -1,6 +1,6 @@
 import {type UUID} from "node:crypto";
 
-export type NewCommentRequest = {
+export type NewComment = {
     name: string;
     message: string;
 }

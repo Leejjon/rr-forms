@@ -1,12 +1,12 @@
 import type {Route} from "./+types/home";
-import type {Comment, NewCommentRequest} from "~/common/comments";
+import type {Comment, NewComment} from "~/common/comments";
 import {type ChangeEvent, useRef, useState} from "react";
 import {nameIsValid} from "~/common/validation";
 import {addComment, getComments} from "~/database/comments.server";
 import {useLoaderData} from "react-router";
 
 export async function action({request}: Route.ActionArgs) {
-    const newComment = await request.json() as NewCommentRequest;
+    const newComment = await request.json() as NewComment;
 
     if (nameIsValid(newComment.name)) {
         addComment(newComment);
