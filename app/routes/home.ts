@@ -2,6 +2,7 @@ import type {Route} from "./+types/home";
 import {addComment, getComments} from "~/database/comments.server";
 import type {NewComment} from "~/common/comments";
 import {redirect} from "react-router";
+import {nameIsValid} from "~/common/validation";
 
 function createCommentsElements() {
     return `<div>${getComments().map((comment) => {
@@ -29,15 +30,7 @@ export async function action({request}: Route.ActionArgs) {
     const name = formData.get("name");
     const message = formData.get("message");
 
-    function nameIsValid(): boolean {
-        if (name) {
-            return name.toString().length > 0 && name.toString().length < 20 &&
-                name.toString().match(/^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$/) !== null;
-        }
-        return false;
-    }
-
-    if (nameIsValid()) {
+    if (nameIsValid(name?.toString())) {
         addComment({name, message} as NewComment);
         return redirect("/");
     } else {
