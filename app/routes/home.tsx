@@ -1,14 +1,15 @@
 import type {Route} from "./+types/home";
-import type {Comment, NewComment} from "~/common/comments";
+import type {NewComment} from "~/common/comments";
 import {type ChangeEvent, useRef, useState} from "react";
-import {nameIsValid} from "~/common/validation";
+import {CommentSchema} from "~/common/validation";
 import {addComment, getComments} from "~/database/comments.server";
 import {useLoaderData} from "react-router";
 
 export async function action({request}: Route.ActionArgs) {
     const newComment = await request.json() as NewComment;
 
-    if (nameIsValid(newComment.name)) {
+    const validationResult = CommentSchema.safeParse(newComment);
+    if (validationResult.success) {
         addComment(newComment);
         return new Response("Success", {status: 200});
     } else {
@@ -28,16 +29,31 @@ export default function Home() {
     const messageInputRef = useRef<HTMLTextAreaElement | null>(null);
 
     function validateUpdatedName(event: ChangeEvent<HTMLInputElement>) {
-        if (nameIsValid(event.target.value)) {
-            setNameInvalid(false);
-        } else {
+        const validationResult = CommentSchema.safeParse({
+            name: event.target.value,
+        });
+        if (!validationResult.success && validationResult.error.issues.find(
+            (issue) => issue.path[0] === "name"
+        )) {
             setNameInvalid(true);
+        } else {
+            setNameInvalid(false);
         }
     }
 
     function submitComment() {
-        if (!nameIsValid(nameInputRef.current?.value)) {
-            nameInputRef.current?.focus();
+        const validationResult = CommentSchema.safeParse({
+            name: nameInputRef.current?.value,
+            message: messageInputRef.current?.value
+        } as NewComment);
+
+        if (!validationResult.success) {
+            for (const issue of validationResult.error.issues) {
+                if (issue.path[0] === 'name') {
+                    nameInputRef.current?.focus();
+                    return;
+                }
+            }
             return;
         }
 
