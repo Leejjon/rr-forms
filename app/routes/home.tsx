@@ -55,8 +55,7 @@ export default function Home() {
             {comments.map((comment) => {
                 return (
                     <div key={comment.id} className="flex flex-col">
-                        <div><b>{comment.name}: </b><>{comment.message} </>
-                        </div>
+                        <div><b>{comment.name}: </b><>{comment.message} </></div>
                         <i>Posted at {new Date(comment.timestamp).toLocaleString()}</i>
                     </div>
                 );
