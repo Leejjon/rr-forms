@@ -8,6 +8,7 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {z} from "zod";
 
 type FormSubmitResponse = {
+    data: NewComment;
     errors: Array<z.core.$ZodIssue>;
 }
 
@@ -23,9 +24,9 @@ export async function action({request}: Route.ActionArgs): Promise<FormSubmitRes
     );
     if (validationResult.success) {
         addComment(newComment);
-        return {errors: []}
+        return {data: {name, message: ""} as NewComment, errors: []}
     } else {
-        return {errors: validationResult.error.issues}
+        return {data: newComment, errors: validationResult.error.issues}
     }
 }
 
@@ -42,7 +43,7 @@ export default function Home() {
         formState: {errors}
     } = useForm({
         resolver: zodResolver(CommentSchema),
-        mode: "onChange"
+        mode: "onChange",
     });
 
     function actionSaysNameIsInvalid() {
@@ -63,12 +64,13 @@ export default function Home() {
             }
             <label>Name:</label>
             <div className="flex items-center gap-2">
-                <input {...register("name")} name='name'
-                       className="border border-gray-400 rounded px-2 py-1"/>
+                <input {...register("name")} name='name' defaultValue={actionResponse?.data.name ?? ""}
+                       className="border border-gray-400 rounded px-2 py-1" />
                 {(actionSaysNameIsInvalid() || errors.name) && <label className="error">You entered an invalid name.</label>}
             </div>
             <label>Message:</label>
-            <textarea {...register("message")} name='message' className="border border-gray-400 rounded px-2 py-1"/>
+            <textarea {...register("message")} name='message' defaultValue={actionResponse?.data.message ?? ""}
+                      className="border border-gray-400 rounded px-2 py-1"/>
             <button
                 type="submit"
                 disabled={!!errors.name}
