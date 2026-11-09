@@ -2,7 +2,7 @@ import type {Route} from "./+types/home";
 import type {NewComment} from "~/common/comments";
 import {CommentSchema} from "~/common/validation";
 import {addComment, getComments} from "~/database/comments.server";
-import {Form, useActionData, useLoaderData} from "react-router";
+import {Form, useActionData, useLoaderData, useNavigation} from "react-router";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {z} from "zod";
@@ -37,6 +37,8 @@ export async function loader() {
 export default function Home() {
     const comments = useLoaderData<typeof loader>();
     const actionResponse = useActionData<typeof action>();
+    const navigation = useNavigation();
+    const isSubmitting = navigation.state !== "idle" && navigation.formMethod === "POST" && navigation.formAction === "/?index";
 
     const {
         register,
@@ -73,9 +75,9 @@ export default function Home() {
                       className="border border-gray-400 rounded px-2 py-1"/>
             <button
                 type="submit"
-                disabled={!!errors.name}
+                disabled={!!errors.name || isSubmitting}
                 className="border border-gray-400 rounded bg-gray-100 px-3 py-1 hover:bg-gray-200 active:bg-gray-300">
-                Submit
+                {isSubmitting ? "Submitting..." : "Submit"}
             </button>
         </Form>
     );
