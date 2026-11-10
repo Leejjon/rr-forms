@@ -4,7 +4,7 @@ import {CommentSchema} from "~/common/validation";
 import {addComment, getComments} from "~/database/comments.server";
 import {Form, useActionData, useLoaderData, useNavigation} from "react-router";
 import {parseSubmission, useForm, report, type SubmissionResult} from "@conform-to/react/future";
-import { coerceFormValue, getConstraints } from '@conform-to/zod/v4/future';
+import {coerceFormValue, getConstraints} from '@conform-to/zod/v4/future';
 
 type FormSubmitResponse = {
     data?: NewComment;
@@ -18,9 +18,9 @@ export async function action({request}: Route.ActionArgs): Promise<FormSubmitRes
     const validationResult = CommentSchema.safeParse(submission.payload);
     if (validationResult.success) {
         addComment(validationResult.data);
-        return { validationResult: report(submission, { targetValue: { ...submission.payload, message: "" }})};
+        return {validationResult: report(submission, {targetValue: {...submission.payload, message: ""}})};
     } else {
-        return { validationResult: report(submission, { error: { issues: validationResult.error.issues} })};
+        return {validationResult: report(submission, {error: {issues: validationResult.error.issues}})};
     }
 }
 
@@ -42,39 +42,43 @@ export default function Home() {
             shouldValidate: 'onBlur',
             shouldRevalidate: 'onInput',
             constraint: getConstraints(CommentSchema),
-    });
+        });
 
     return (
-        <Form action="/?index" method="POST" {...form.props} className="flex flex-col items-start *:m-1">
-            {comments.map((comment) => {
-                return (
-                    <div key={comment.id} className="flex flex-col">
-                        <div><b>{comment.name}: </b><>{comment.message} </></div>
-                        <i>Posted at {new Date(comment.timestamp).toLocaleString()}</i>
-                    </div>
-                );
-            })
-            }
-            <label>Name:</label>
-            <div className="flex items-center gap-2">
-                <input id={fields.name.id} name={fields.name.name} defaultValue={fields.name.defaultValue} placeholder=""
-                       aria-invalid={!fields.name.valid || undefined} aria-describedby={fields.name.ariaDescribedBy}
-                       required={fields.name.required}
-                       minLength={fields.name.minLength}
-                       maxLength={fields.name.maxLength}
-                       pattern={fields.name.pattern}
-                       className="border border-gray-400 rounded px-2 py-1" />
-                <label className="hidden [input:not(:placeholder-shown):invalid+&]:inline">You entered an invalid name.</label>
-            </div>
-            <label>Message:</label>
-            <textarea id={fields.message.id} name={fields.message.name} defaultValue={actionData?.data?.message ?? ""}
-                      className="border border-gray-400 rounded px-2 py-1"/>
-            <button
-                type="submit"
-                disabled={!form.valid || isSubmitting}
-                className="border border-gray-400 rounded bg-gray-100 px-3 py-1 hover:bg-gray-200 active:bg-gray-300">
-                {isSubmitting ? "Submitting..." : "Submit"}
-            </button>
-        </Form>
+            <Form action="/?index" method="POST" {...form.props} noValidate={false} className="flex flex-col items-start *:m-1">
+                {comments.map((comment) => {
+                    return (
+                        <div key={comment.id} className="flex flex-col">
+                            <div><b>{comment.name}: </b><>{comment.message} </>
+                            </div>
+                            <i>Posted at {new Date(comment.timestamp).toLocaleString()}</i>
+                        </div>
+                    );
+                })
+                }
+                <label>Name:</label>
+                <div className="flex items-center gap-2">
+                    <input id={fields.name.id} name={fields.name.name} defaultValue={fields.name.defaultValue}
+                           placeholder=""
+                           aria-invalid={!fields.name.valid || undefined} aria-describedby={fields.name.ariaDescribedBy}
+                           required={fields.name.required}
+                           minLength={fields.name.minLength}
+                           maxLength={fields.name.maxLength}
+                           pattern={fields.name.pattern}
+                           className="border border-gray-400 rounded px-2 py-1"/>
+                    <label className="hidden [input:not(:placeholder-shown):invalid+&]:inline">You entered an invalid
+                        name.</label>
+                </div>
+                <label>Message:</label>
+                <textarea id={fields.message.id} name={fields.message.name}
+                          defaultValue={actionData?.data?.message ?? ""}
+                          className="border border-gray-400 rounded px-2 py-1"/>
+                <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="border border-gray-400 rounded bg-gray-100 px-3 py-1 hover:bg-gray-200 active:bg-gray-300">
+                    {isSubmitting ? "Submitting..." : "Submit"}
+                </button>
+            </Form>
     );
 }
