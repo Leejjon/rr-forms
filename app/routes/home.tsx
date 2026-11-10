@@ -38,7 +38,10 @@ export default function Home() {
         form, fields
     } = useForm(
         coerceFormValue(CommentSchema), {
-        lastResult: actionData?.validationResult, shouldValidate: 'onBlur', shouldRevalidate: 'onInput', constraint: getConstraints(CommentSchema),
+            lastResult: actionData?.validationResult,
+            shouldValidate: 'onBlur',
+            shouldRevalidate: 'onInput',
+            constraint: getConstraints(CommentSchema),
     });
 
     return (
@@ -54,14 +57,14 @@ export default function Home() {
             }
             <label>Name:</label>
             <div className="flex items-center gap-2">
-                <input id={fields.name.id} name={fields.name.name} defaultValue={fields.name.defaultValue}
+                <input id={fields.name.id} name={fields.name.name} defaultValue={fields.name.defaultValue} placeholder=""
                        aria-invalid={!fields.name.valid || undefined} aria-describedby={fields.name.ariaDescribedBy}
-                       required={fields.message.required}
-                       minLength={fields.message.minLength}
-                       maxLength={fields.message.maxLength}
+                       required={fields.name.required}
+                       minLength={fields.name.minLength}
+                       maxLength={fields.name.maxLength}
                        pattern={fields.name.pattern}
                        className="border border-gray-400 rounded px-2 py-1" />
-                <label className="error hidden [input:invalid+&]:inline">You entered an invalid name.</label>
+                <label className="hidden [input:not(:placeholder-shown):invalid+&]:inline">You entered an invalid name.</label>
             </div>
             <label>Message:</label>
             <textarea id={fields.message.id} name={fields.message.name} defaultValue={actionData?.data?.message ?? ""}
