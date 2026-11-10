@@ -4,7 +4,7 @@ import {CommentSchema} from "~/common/validation";
 import {addComment, getComments} from "~/database/comments.server";
 import {Form, useActionData, useLoaderData, useNavigation} from "react-router";
 import {parseSubmission, useForm, report, type SubmissionResult} from "@conform-to/react/future";
-import { coerceFormValue } from '@conform-to/zod/v4/future';
+import { coerceFormValue, getConstraints } from '@conform-to/zod/v4/future';
 
 type FormSubmitResponse = {
     data?: NewComment;
@@ -38,7 +38,7 @@ export default function Home() {
         form, fields
     } = useForm(
         coerceFormValue(CommentSchema), {
-        lastResult: actionData?.validationResult, shouldValidate: 'onBlur', shouldRevalidate: 'onInput',
+        lastResult: actionData?.validationResult, shouldValidate: 'onBlur', shouldRevalidate: 'onInput', constraint: getConstraints(CommentSchema),
     });
 
     return (
@@ -59,9 +59,9 @@ export default function Home() {
                        required={fields.message.required}
                        minLength={fields.message.minLength}
                        maxLength={fields.message.maxLength}
-                       pattern={fields.name.pattern} // TODO: Make sure it actually shows an error in these cases without javascript
+                       pattern={fields.name.pattern}
                        className="border border-gray-400 rounded px-2 py-1" />
-                {!fields.name.valid ? <label className="error">You entered an invalid name.</label> : <label></label>}
+                <label className="error hidden [input:invalid+&]:inline">You entered an invalid name.</label>
             </div>
             <label>Message:</label>
             <textarea id={fields.message.id} name={fields.message.name} defaultValue={actionData?.data?.message ?? ""}
